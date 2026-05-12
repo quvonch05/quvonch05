@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Baratov Quvonchbek — Fullstack Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #1a1a25;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --accent3: #43e97b;
+    --text: #e8e8f0;
+    --muted: #888899;
+    --border: rgba(108,99,255,0.2);
+    --card: rgba(26,26,37,0.8);
+    --mono: 'Space Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow-x: hidden;
+  }
+
+  /* CURSOR - faqat sichqoncha bo'lgan qurilmalarda */
+  @media (hover: hover) and (pointer: fine) {
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease;
+      mix-blend-mode: screen;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1px solid rgba(108,99,255,0.5);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transition: all 0.08s linear;
+    }
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 200px;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* GRID BACKGROUND */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(108,99,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(108,99,255,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 4rem;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: var(--mono);
+    font-size: 1rem;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    font-family: var(--mono);
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 0.5rem 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-cta:hover {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* Burger menyu - mobil uchun */
+  .burger {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    gap: 5px;
+    z-index: 101;
+  }
+  .burger div {
+    width: 25px;
+    height: 2px;
+    background: var(--text);
+    transition: 0.3s;
+  }
+
+  /* SECTIONS */
+  section { position: relative; z-index: 1; }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 8rem 4rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+    top: -100px; right: -100px;
+    pointer-events: none;
+  }
+
+  .hero-glow2 {
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(67,233,123,0.06) 0%, transparent 70%);
+    bottom: 0; left: 200px;
+    pointer-events: none;
+  }
+
+  .hero-content { max-width: 900px; }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--accent3);
+    margin-bottom: 2rem;
+    letter-spacing: 0.12em;
+  }
+
+  .hero-tag::before {
+    content: '';
+    width: 30px; height: 1px;
+    background: var(--accent3);
+    display: inline-block;
+  }
+
+  .hero-name {
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 1rem;
+    letter-spacing: -0.03em;
+  }
+
+  .hero-name span {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(108,99,255,0.6);
+  }
+
+  .hero-title {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  .typing-cursor {
+    display: inline-block;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .hero-desc {
+    font-size: 1.05rem;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 600px;
+    margin-bottom: 3rem;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.85rem 2rem;
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+    position: relative;
+    display: inline-block;
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; right: -4px;
+    width: 100%; height: 100%;
+    border: 1px solid var(--accent);
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover { transform: translate(-3px, -3px); }
+  .btn-primary:hover::after { bottom: -7px; right: -7px; }
+
+  .btn-outline {
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.85rem 2rem;
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    transition: all 0.2s;
+  }
+
+  .btn-outline:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 4rem;
+    margin-top: 5rem;
+    padding-top: 3rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .stat-num {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .stat-num span { color: var(--accent); }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .hero-scroll {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(var(--accent), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(0.8); }
+    50% { opacity: 1; transform: scaleY(1); }
+  }
+
+  /* SKILLS */
+  #skills {
+    padding: 8rem 4rem;
+    background: var(--bg2);
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800;
+    margin-bottom: 4rem;
+    letter-spacing: -0.02em;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .skill-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skill-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--accent);
+    transition: height 0.3s;
+  }
+
+  .skill-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+  .skill-card:hover::before { height: 100%; }
+
+  .skill-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .skill-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .skill-desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+  }
+
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 3px 10px;
+    border: 1px solid rgba(108,99,255,0.3);
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  .tag.green { border-color: rgba(67,233,123,0.3); color: var(--accent3); }
+  .tag.red { border-color: rgba(255,101,132,0.3); color: var(--accent2); }
+
+  /* PROJECTS */
+  #projects { padding: 8rem 4rem; }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  .project-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 2.5rem;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .project-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-6px);
+  }
+
+  .project-num {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
+  }
+
+  .project-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+  }
+
+  .project-desc {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .project-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 2rem;
+  }
+
+  .project-links {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .proj-link {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+    transition: border-color 0.2s;
+  }
+
+  .proj-link:hover { border-color: var(--accent); }
+  .proj-link span { font-size: 0.9rem; }
+
+  .featured-badge {
+    position: absolute;
+    top: 1.5rem; right: 1.5rem;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.3);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    padding: 3px 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* SERVICES */
+  #services {
+    padding: 8rem 4rem;
+    background: var(--bg2);
+  }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1px;
+    border: 1px solid var(--border);
+    margin-top: 1rem;
+  }
+
+  .service-item {
+    padding: 3rem 2.5rem;
+    background: var(--bg2);
+    transition: background 0.3s;
+    border: 1px solid transparent;
+    cursor: default;
+  }
+
+  .service-item:hover {
+    background: var(--bg3);
+    border-color: var(--border);
+  }
+
+  .service-num {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
+  }
+
+  .service-icon-wrap {
+    width: 50px; height: 50px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s;
+  }
+
+  .service-item:hover .service-icon-wrap {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.1);
+  }
+
+  .service-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+  }
+
+  .service-desc {
+    font-size: 0.87rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .service-price {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--accent3);
+    letter-spacing: 0.05em;
+  }
+
+  /* CONTACT FORM */
+  #contact { padding: 8rem 4rem; }
+
+  .contact-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: start;
+  }
+
+  .contact-info h2 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .contact-info p {
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 2.5rem;
+  }
+
+  .contact-detail {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.2rem;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+  }
+
+  .contact-detail-icon {
+    width: 36px; height: 36px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .contact-detail a { color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .contact-detail a:hover { color: var(--accent); }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.85rem 1rem;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    appearance: none;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .form-textarea { resize: vertical; min-height: 130px; }
+
+  .form-select option { background: var(--bg3); }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 1rem 2rem;
+    font-family: var(--mono);
+    font-size: 0.88rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    position: relative;
+  }
+
+  .submit-btn:hover { background: #5a52d5; }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .form-status {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    display: none;
+  }
+
+  .form-status.success {
+    background: rgba(67,233,123,0.1);
+    border: 1px solid rgba(67,233,123,0.3);
+    color: var(--accent3);
+    display: block;
+  }
+
+  .form-status.error {
+    background: rgba(255,101,132,0.1);
+    border: 1px solid rgba(255,101,132,0.3);
+    color: var(--accent2);
+    display: block;
+  }
+
+  /* TESTIMONIALS */
+  #testimonials {
+    padding: 6rem 4rem;
+    background: var(--bg2);
+    overflow: hidden;
+  }
+
+  .testi-track {
+    display: flex;
+    gap: 1.5rem;
+    animation: scrollTesti 30s linear infinite;
+    width: max-content;
+  }
+
+  .testi-track:hover { animation-play-state: paused; }
+
+  @keyframes scrollTesti {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .testi-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    min-width: 360px;
+    max-width: 360px;
+    flex-shrink: 0;
+  }
+
+  .testi-stars { color: #ffd700; font-size: 0.85rem; margin-bottom: 1rem; }
+
+  .testi-text {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+  }
+
+  .testi-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .testi-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .testi-name { font-weight: 600; font-size: 0.9rem; }
+  .testi-role { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo {
+    font-family: var(--mono);
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .footer-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--accent); }
+
+  .footer-copy {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  /* ANIMATIONS */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 2rem; right: 2rem;
+    background: var(--bg3);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 1rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    z-index: 500;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ========== RESPONSIVE (MOSLASHTIRISH) ========== */
+  
+  /* Planshet (768px - 1024px) */
+  @media (max-width: 1024px) {
+    nav { padding: 1rem 2rem; }
+    #hero, #skills, #projects, #services, #contact, #testimonials {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+    .contact-wrap { gap: 2.5rem; }
+    .projects-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  }
+
+  /* Mobil (max 768px) */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    
+    .burger {
+      display: flex;
+    }
+    
+    .nav-links { 
+      position: fixed;
+      top: 70px;
+      right: -100%;
+      flex-direction: column;
+      background: rgba(10,10,15,0.98);
+      backdrop-filter: blur(20px);
+      width: 70%;
+      height: calc(100vh - 70px);
+      padding: 2rem;
+      gap: 1.5rem;
+      transition: right 0.3s ease;
+      border-left: 1px solid var(--border);
+    }
+    
+    .nav-links.active { right: 0; }
+    
+    .burger.active div:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .burger.active div:nth-child(2) { opacity: 0; }
+    .burger.active div:nth-child(3) { transform: rotate(-45deg) translate(7px, -6px); }
+    
+    #hero, #skills, #projects, #services, #contact, #testimonials, footer {
+      padding-left: 1.2rem;
+      padding-right: 1.2rem;
+    }
+    
+    #hero { padding-top: 6rem; }
+    
+    .hero-stats { 
+      gap: 1.5rem; 
+      flex-wrap: wrap;
+    }
+    
+    .hero-stats > div { 
+      flex: 1; 
+      min-width: 80px; 
+    }
+    
+    .stat-num { font-size: 1.4rem; }
+    .stat-label { font-size: 0.65rem; }
+    .hero-scroll { display: none; }
+    
+    .contact-wrap { grid-template-columns: 1fr; gap: 2.5rem; }
+    .services-grid { grid-template-columns: 1fr; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .skills-grid { grid-template-columns: 1fr; }
+    
+    .testi-card { 
+      min-width: 280px; 
+      max-width: 280px;
+      padding: 1.2rem;
+    }
+    
+    footer { 
+      flex-direction: column; 
+      text-align: center;
+      gap: 1rem;
+    }
+    
+    .footer-links { justify-content: center; }
+  }
+
+  /* Kichik mobil (max 480px) */
+  @media (max-width: 480px) {
+    #hero, #skills, #projects, #services, #contact, #testimonials {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    .hero-name { font-size: clamp(2rem, 10vw, 3rem); }
+    .hero-desc { font-size: 0.9rem; }
+    
+    .hero-stats { 
+      flex-direction: column; 
+      gap: 1rem;
+    }
+    
+    .hero-stats > div { width: 100%; }
+    
+    .skill-card, .project-card, .service-item { padding: 1.2rem; }
+    .project-card { padding: 1.5rem; }
+    .project-title { font-size: 1.2rem; }
+    
+    .contact-detail { 
+      font-size: 0.75rem; 
+      word-break: break-word;
+    }
+    
+    .testi-card { 
+      min-width: 240px; 
+      max-width: 240px;
+    }
+    
+    .testi-text { font-size: 0.8rem; }
+    
+    .toast { 
+      left: 1rem; 
+      right: 1rem; 
+      bottom: 1rem; 
+      text-align: center;
+    }
+    
+    .btn-primary, .btn-outline { 
+      padding: 0.6rem 1.2rem; 
+      font-size: 0.75rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">BQ.dev</a>
+  
+  <!-- Burger menyu -->
+  <div class="burger" id="burger">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+  
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#skills">Ko'nikmalar</a></li>
+    <li><a href="#projects">Loyihalar</a></li>
+    <li><a href="#services">Xizmatlar</a></li>
+    <li><a href="#testimonials">Fikrlar</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Bog'lanish</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+
+  <div class="hero-content">
+    <div class="hero-tag">Fullstack Developer</div>
+
+    <h1 class="hero-name">
+      Baratov<br>
+      <span>Quvonchbek</span>
+    </h1>
+
+    <div class="hero-title">
+      &gt; <span id="typed"></span><span class="typing-cursor">_</span>
+    </div>
+
+    <p class="hero-desc">
+      Frontend dan backend gacha — to'liq stek bo'yicha veb ilovalar yarataman.
+      React interfeyslari, Node.js API'lari va Supabase ekotizimi yordamida
+      tezkor, chiroyli va masshtablanadigan mahsulotlar ishlab chiqaman.
+    </p>
+
+    <div class="hero-btns">
+      <a href="#projects" class="btn-primary">Loyihalarni ko'rish</a>
+      <a href="#contact" class="btn-outline">Bog'lanish →</a>
+    </div>
+
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">3<span>+</span></div>
+        <div class="stat-label">Yil tajriba</div>
+      </div>
+      <div>
+        <div class="stat-num">28<span>+</span></div>
+        <div class="stat-label">Loyihalar</div>
+      </div>
+      <div>
+        <div class="stat-num">15<span>+</span></div>
+        <div class="stat-label">Mijozlar</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    scroll
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="section-label">Texnologiyalar</div>
+  <h2 class="section-title">Frontend'dan<br>Backend'gacha</h2>
+
+  <div class="skills-grid">
+    <div class="skill-card fade-in">
+      <div class="skill-icon">🎨</div>
+      <div class="skill-name">Frontend & UI</div>
+      <div class="skill-desc">Zamonaviy, responsive va animatsiyali interfeyslar yaratish. Komponent arxitekturasi, state boshqaruvi va dizayn tizimlarini qurish</div>
+      <div class="skill-tags">
+        <span class="tag">React</span>
+        <span class="tag">Next.js</span>
+        <span class="tag">TypeScript</span>
+        <span class="tag">Tailwind CSS</span>
+        <span class="tag">Framer Motion</span>
+      </div>
+    </div>
+
+    <div class="skill-card fade-in">
+      <div class="skill-icon">🗄️</div>
+      <div class="skill-name">Backend & API</div>
+      <div class="skill-desc">RESTful va GraphQL API'lar yaratish, microservices arxitekturasi, middleware va autentifikatsiya tizimlari</div>
+      <div class="skill-tags">
+        <span class="tag">Node.js</span>
+        <span class="tag">Express</span>
+        <span class="tag">NestJS</span>
+        <span class="tag">REST API</span>
+        <span class="tag">GraphQL</span>
+      </div>
+    </div>
+
+    <div class="skill-card fade-in">
+      <div class="skill-icon">⚡</div>
+      <div class="skill-name">Supabase ekotizimi</div>
+      <div class="skill-desc">Supabase bilan real-time database, RLS qoidalari, Edge Functions, Auth va Storage tizimlarini qurish</div>
+      <div class="skill-tags">
+        <span class="tag green">Supabase</span>
+        <span class="tag green">PostgreSQL</span>
+        <span class="tag green">RLS</span>
+        <span class="tag green">Edge Functions</span>
+        <span class="tag green">Realtime</span>
+      </div>
+    </div>
+
+    <div class="skill-card fade-in">
+      <div class="skill-icon">📱</div>
+      <div class="skill-name">Mobile & Cross-platform</div>
+      <div class="skill-desc">React Native bilan iOS va Android ilovalar, Expo ekotizimi, push-xabarnomalar va native modullar</div>
+      <div class="skill-tags">
+        <span class="tag">React Native</span>
+        <span class="tag">Expo</span>
+        <span class="tag">PWA</span>
+        <span class="tag">App Store</span>
+      </div>
+    </div>
+
+    <div class="skill-card fade-in">
+      <div class="skill-icon">🔐</div>
+      <div class="skill-name">Auth & Xavfsizlik</div>
+      <div class="skill-desc">JWT, OAuth2, Supabase Auth, cookie-based sessiyalar, bcrypt shifrlash, CORS va XSS himoyalari</div>
+      <div class="skill-tags">
+        <span class="tag red">JWT</span>
+        <span class="tag red">OAuth2</span>
+        <span class="tag red">NextAuth</span>
+        <span class="tag red">CORS</span>
+      </div>
+    </div>
+
+    <div class="skill-card fade-in">
+      <div class="skill-icon">☁️</div>
+      <div class="skill-name">DevOps & Deploy</div>
+      <div class="skill-desc">Docker konteynerlashtirish, CI/CD pipelinelar, Vercel/Railway deploy va monitoring tizimlari</div>
+      <div class="skill-tags">
+        <span class="tag">Docker</span>
+        <span class="tag">GitHub Actions</span>
+        <span class="tag">Vercel</span>
+        <span class="tag">Railway</span>
+        <span class="tag">Nginx</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-label">Portfolio</div>
+  <h2 class="section-title">So'nggi<br>loyihalarim</h2>
+
+  <div class="projects-grid">
+    <div class="project-card fade-in">
+      <div class="featured-badge">★ Featured</div>
+      <div class="project-num">01 / NEXT.JS + SUPABASE</div>
+      <div class="project-title">MarketHub — SaaS E-commerce</div>
+      <div class="project-desc">Ko'p do'konli SaaS platforma — Next.js 14 App Router frontend, Supabase backend, Stripe to'lovlar, real-time zaxira kuzatish va admin dashboard.</div>
+      <div class="project-stack">
+        <span class="tag green">Supabase</span>
+        <span class="tag">Next.js 14</span>
+        <span class="tag">Stripe</span>
+        <span class="tag">Tailwind</span>
+        <span class="tag">Prisma</span>
+      </div>
+      <div class="project-links">
+        <a href="#" class="proj-link"><span>→</span> GitHub</a>
+        <a href="#" class="proj-link"><span>↗</span> Demo</a>
+      </div>
+    </div>
+
+    <div class="project-card fade-in">
+      <div class="project-num">02 / REACT + NODE + REALTIME</div>
+      <div class="project-title">WorkSpace — Jamoa Ilovasi</div>
+      <div class="project-desc">Slack-ga o'xshash korporativ platforma. React frontend, NestJS backend, Supabase Realtime orqali jonli chat, fayl almashish va video qo'ng'iroqlar.</div>
+      <div class="project-stack">
+        <span class="tag">React</span>
+        <span class="tag green">Supabase Realtime</span>
+        <span class="tag">NestJS</span>
+        <span class="tag">WebRTC</span>
+      </div>
+      <div class="project-links">
+        <a href="#" class="proj-link"><span>→</span> GitHub</a>
+        <a href="#" class="proj-link"><span>↗</span> Case Study</a>
+      </div>
+    </div>
+
+    <div class="project-card fade-in">
+      <div class="project-num">03 / NEXT.JS + SUPABASE + AI</div>
+      <div class="project-title">LearnFlow — Ta'lim Platformasi</div>
+      <div class="project-desc">Online ta'lim LMS tizimi. Video darslar, interaktiv testlar, AI-yordamchi, progress kuzatish va sertifikat generatsiya qilish.</div>
+      <div class="project-stack">
+        <span class="tag">Next.js</span>
+        <span class="tag green">Supabase</span>
+        <span class="tag">OpenAI</span>
+        <span class="tag">Mux Video</span>
+      </div>
+      <div class="project-links">
+        <a href="#" class="proj-link"><span>→</span> GitHub</a>
+        <a href="#" class="proj-link"><span>↗</span> Demo</a>
+      </div>
+    </div>
+
+    <div class="project-card fade-in">
+      <div class="project-num">04 / REACT NATIVE + SUPABASE</div>
+      <div class="project-title">FoodRun — Yetkazib Berish App</div>
+      <div class="project-desc">iOS va Android uchun oziq-ovqat yetkazib berish ilovasi. Real-time buyurtma kuzatish, harita integratsiyasi, to'lov va kuryer panel.</div>
+      <div class="project-stack">
+        <span class="tag">React Native</span>
+        <span class="tag green">Supabase</span>
+        <span class="tag">Expo</span>
+        <span class="tag">Google Maps</span>
+      </div>
+      <div class="project-links">
+        <a href="#" class="proj-link"><span>→</span> GitHub</a>
+        <a href="#" class="proj-link"><span>↗</span> App Store</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="section-label">Xizmatlar</div>
+  <h2 class="section-title">Nima<br>taklif etaman</h2>
+
+  <div class="services-grid">
+    <div class="service-item fade-in">
+      <div class="service-num">01</div>
+      <div class="service-icon-wrap">🌐</div>
+      <div class="service-title">To'liq veb ilova yaratish</div>
+      <div class="service-desc">Dizayndan deploymentgacha — Next.js frontend, Node.js backend, Supabase database va to'liq infrastruktura.</div>
+      <div class="service-price">$800 — $5000 / loyiha</div>
+    </div>
+
+    <div class="service-item fade-in">
+      <div class="service-num">02</div>
+      <div class="service-icon-wrap">🎨</div>
+      <div class="service-title">Frontend UI/UX dasturlash</div>
+      <div class="service-desc">Figma dizaynni React/Next.js ga aylantirish. Responsive, animatsiyali va yuqori sifatli interfeys.</div>
+      <div class="service-price">$300 — $2000 / loyiha</div>
+    </div>
+
+    <div class="service-item fade-in">
+      <div class="service-num">03</div>
+      <div class="service-icon-wrap">⚡</div>
+      <div class="service-title">Supabase integratsiya</div>
+      <div class="service-desc">Mavjud loyihangizga Supabase qo'shish — Auth, Realtime, Storage, RLS va Edge Functions sozlash.</div>
+      <div class="service-price">$300 — $1500 / loyiha</div>
+    </div>
+
+    <div class="service-item fade-in">
+      <div class="service-num">04</div>
+      <div class="service-icon-wrap">📱</div>
+      <div class="service-title">React Native mobil ilova</div>
+      <div class="service-desc">iOS va Android uchun bitta kod bazasida cross-platform mobil ilovalar. Supabase backend bilan.</div>
+      <div class="service-price">$1000 — $4000 / ilova</div>
+    </div>
+
+    <div class="service-item fade-in">
+      <div class="service-num">05</div>
+      <div class="service-icon-wrap">🔗</div>
+      <div class="service-title">API va integratsiyalar</div>
+      <div class="service-desc">To'lov tizimlari (Stripe, Payme), SMS, email, xarita xizmatlari va boshqa uchinchi tomon API'larini ulash.</div>
+      <div class="service-price">$200 — $1000 / integratsiya</div>
+    </div>
+
+    <div class="service-item fade-in">
+      <div class="service-num">06</div>
+      <div class="service-icon-wrap">🤝</div>
+      <div class="service-title">Texnik maslahat & mentoring</div>
+      <div class="service-desc">Arxitektura, texnologiya tanlash, code review va fullstack loyiha yo'nalishi bo'yicha maslahat.</div>
+      <div class="service-price">$50 / soat</div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="section-label">Mijozlar fikri</div>
+  <h2 class="section-title" style="margin-bottom:3rem">Ular nima deydi</h2>
+
+  <div style="overflow:hidden">
+    <div class="testi-track" id="testiTrack">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Quvonchbek bizning SaaS platformamiz uchun to'liq Supabase backend'ini yaratdi. Ish sifati ajoyib, kod toza va kelajakka yo'naltirilgan arxitektura."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#6c63ff">AS</div>
+          <div>
+            <div class="testi-name">Alisher Soliyev</div>
+            <div class="testi-role">CTO, TechStart UZ</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"API integratsiyalar bo'yicha juda yaxshi mutaxassis. Stripe va Telegram Bot integratsiyasini o'z vaqtida va muammosiz amalga oshirdi."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#43e97b;color:#1a1a25">MK</div>
+          <div>
+            <div class="testi-name">Malika Karimova</div>
+            <div class="testi-role">Founder, ShopEasy</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Performance optimizatsiya bo'yicha ish qildik — API javob vaqtimiz 800ms dan 120ms ga tushdi. Natijadan juda mamnunmiz!"</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#ff6584">RU</div>
+          <div>
+            <div class="testi-name">Rustam Umarov</div>
+            <div class="testi-role">Backend Lead, DataFlow</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Real-time messenjer API'si uchun NestJS va Supabase bilan ishladi. Hamma muammolarni o'z vaqtida hal qildi, muloqot ham juda qulay."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#ffd700;color:#1a1a25">ZN</div>
+          <div>
+            <div class="testi-name">Zulfiya Nazarova</div>
+            <div class="testi-role">Product Manager, ChatFlex</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Multi-tenant auth sistemasini yaratishda yordam berdi. RLS qoidalari va JWT token boshqaruvi professional darajada qilindi."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#5a52d5">BX</div>
+          <div>
+            <div class="testi-name">Bobur Xolmatov</div>
+            <div class="testi-role">Startup Founder</div>
+          </div>
+        </div>
+      </div>
+      <!-- Duplicate for seamless loop -->
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Quvonchbek bizning SaaS platformamiz uchun to'liq Supabase backend'ini yaratdi. Ish sifati ajoyib, kod toza va kelajakka yo'naltirilgan arxitektura."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#6c63ff">AS</div>
+          <div>
+            <div class="testi-name">Alisher Soliyev</div>
+            <div class="testi-role">CTO, TechStart UZ</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"API integratsiyalar bo'yicha juda yaxshi mutaxassis. Stripe va Telegram Bot integratsiyasini o'z vaqtida va muammosiz amalga oshirdi."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#43e97b;color:#1a1a25">MK</div>
+          <div>
+            <div class="testi-name">Malika Karimova</div>
+            <div class="testi-role">Founder, ShopEasy</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Performance optimizatsiya bo'yicha ish qildik — API javob vaqtimiz 800ms dan 120ms ga tushdi. Natijadan juda mamnunmiz!"</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#ff6584">RU</div>
+          <div>
+            <div class="testi-name">Rustam Umarov</div>
+            <div class="testi-role">Backend Lead, DataFlow</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Real-time messenjer API'si uchun NestJS va Supabase bilan ishladi. Hamma muammolarni o'z vaqtida hal qildi, muloqot ham juda qulay."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#ffd700;color:#1a1a25">ZN</div>
+          <div>
+            <div class="testi-name">Zulfiya Nazarova</div>
+            <div class="testi-role">Product Manager, ChatFlex</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Multi-tenant auth sistemasini yaratishda yordam berdi. RLS qoidalari va JWT token boshqaruvi professional darajada qilindi."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:#5a52d5">BX</div>
+          <div>
+            <div class="testi-name">Bobur Xolmatov</div>
+            <div class="testi-role">Startup Founder</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label">Aloqa</div>
+
+  <div class="contact-wrap">
+    <div class="contact-info fade-in">
+      <h2>Loyiha<br>boshlaylikmi?</h2>
+      <p>
+        Yangi loyiha, mavjud tizimni yaxshilash yoki shunchaki maslahat
+        kerakmi — yozing, 24 soat ichida javob beraman.
+      </p>
+
+      <div class="contact-detail">
+        <div class="contact-detail-icon">📧</div>
+        <a href="mailto:baratovquvonchbek569@gmail.com">baratovquvonchbek569@gmail.com</a>
+      </div>
+      <div class="contact-detail">
+        <div class="contact-detail-icon">💬</div>
+        <a href="https://t.me/Students_Alhamdulillah" target="_blank">@Students_Alhamdulillah (Telegram)</a>
+      </div>
+      <div class="contact-detail">
+        <div class="contact-detail-icon">🌐</div>
+        <a href="https://github.com/quvonch05" target="_blank">github.com/quvonch05</a>
+      </div>
+      <div class="contact-detail">
+        <div class="contact-detail-icon">📍</div>
+        <span style="color:var(--muted)">Toshkent, O'zbekiston (Remote ham)</span>
+      </div>
+
+      <div style="margin-top:2.5rem;padding:1.5rem;background:var(--bg3);border:1px solid var(--border)">
+        <div style="font-family:var(--mono);font-size:0.72rem;color:var(--accent);letter-spacing:0.12em;margin-bottom:0.8rem">MAVJUDLIK</div>
+        <div style="font-size:0.9rem;color:var(--text)">✅ Hozir yangi loyiha qabul qilaman</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:0.4rem;font-family:var(--mono)">Javob vaqti: 2–24 soat</div>
+      </div>
+    </div>
+
+    <div class="fade-in">
+      <div id="supabase-status" style="display:none;margin-bottom:1rem;padding:0.8rem;background:rgba(67,233,123,0.08);border:1px solid rgba(67,233,123,0.2);font-family:var(--mono);font-size:0.75rem;color:var(--accent3)">
+        ✓ Supabase ulanish muvaffaqiyatli
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Ism *</label>
+        <input class="form-input" id="f-name" type="text" placeholder="Baratov Quvonchbek">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email *</label>
+        <input class="form-input" id="f-email" type="email" placeholder="quvonchbek@company.com">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Telefon</label>
+        <input class="form-input" id="f-phone" type="text" placeholder="+998 90 123 45 67">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Xizmat turi *</label>
+        <select class="form-select" id="f-service">
+          <option value="">— Tanlang —</option>
+          <option>To'liq veb ilova yaratish</option>
+          <option>Frontend UI/UX dasturlash</option>
+          <option>Supabase integratsiya</option>
+          <option>React Native mobil ilova</option>
+          <option>API va integratsiyalar</option>
+          <option>Texnik maslahat & mentoring</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Xabar *</label>
+        <textarea class="form-textarea" id="f-message" placeholder="Loyihangiz haqida qisqacha yozing — nima kerak, qanday muddatda, taxminiy byudjet..."></textarea>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="submitForm()">
+        XABAR YUBORISH →
+      </button>
+
+      <div class="form-status" id="formStatus"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">© 2026 Baratov Quvonchbek</div>
+  <div class="footer-links">
+    <a href="https://github.com/quvonch05" target="_blank">GitHub</a>
+    <a href="https://t.me/Students_Alhamdulillah" target="_blank">Telegram</a>
+    <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+  </div>
+  <div class="footer-copy">React • Next.js • Node.js • </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// SUPABASE CONFIG
+// ============================================================
+const SUPABASE_URL = 'https://bzrhpjxavhsoairmuvxy.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ6cmhwanhhdmhzb2Fpcm11dnh5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODQzMzc0MiwiZXhwIjoyMDk0MDA5NzQyfQ.625RBYzb_Zxdr6xl3Fz6Z-DILhXtpwzA_8xVuMA7j8Y';
+
+const DEMO_MODE = SUPABASE_URL.includes('YOUR_PROJECT');
+
+let supabaseClient = null;
+
+if (!DEMO_MODE) {
+  try {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const statusDiv = document.getElementById('supabase-status');
+    if (statusDiv) statusDiv.style.display = 'block';
+  } catch(e) {
+    console.log('Supabase ulanmadi, demo rejimda ishlaydi');
+  }
+}
+
+// ===== BURGER MENYU =====
+const burger = document.getElementById('burger');
+const navLinks = document.getElementById('navLinks');
+
+if (burger && navLinks) {
+  burger.addEventListener('click', () => {
+    burger.classList.toggle('active');
+    navLinks.classList.toggle('active');
+  });
+  
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', () => {
+      burger.classList.remove('active');
+      navLinks.classList.remove('active');
+    });
+  });
+}
+
+// ===== CURSOR (faqat sichqoncha uchun) =====
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX;
+    my = e.clientY;
+    if (cursor) {
+      cursor.style.left = mx - 6 + 'px';
+      cursor.style.top = my - 6 + 'px';
+    }
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.15;
+    ry += (my - ry) * 0.15;
+    if (ring) {
+      ring.style.left = rx - 18 + 'px';
+      ring.style.top = ry - 18 + 'px';
+    }
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button, .skill-card, .project-card').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      if (cursor) cursor.style.transform = 'scale(2)';
+    });
+    el.addEventListener('mouseleave', () => {
+      if (cursor) cursor.style.transform = 'scale(1)';
+    });
+  });
+}
+
+// ===== TYPING ANIMATION =====
+const phrases = [
+  'Fullstack developer',
+  'React & Next.js',
+  'Node.js & Supabase',
+  'UI/UX implementor',
+  'End-to-end builder'
+];
+let pi = 0, ci = 0, deleting = false;
+const typed = document.getElementById('typed');
+
+function typeEffect() {
+  if (!typed) return;
+  const word = phrases[pi];
+  if (!deleting) {
+    typed.textContent = word.substring(0, ci + 1);
+    ci++;
+    if (ci === word.length) { deleting = true; setTimeout(typeEffect, 1800); return; }
+  } else {
+    typed.textContent = word.substring(0, ci - 1);
+    ci--;
+    if (ci === 0) { deleting = false; pi = (pi + 1) % phrases.length; }
+  }
+  setTimeout(typeEffect, deleting ? 60 : 100);
+}
+typeEffect();
+
+// ===== SCROLL ANIMATIONS =====
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// ===== TOAST =====
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.style.borderColor = type === 'success' ? 'var(--accent3)' : 'var(--accent2)';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ===== FORM SUBMIT =====
+async function submitForm() {
+  const name = document.getElementById('f-name').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const service = document.getElementById('f-service').value;
+  const message = document.getElementById('f-message').value.trim();
+  const btn = document.getElementById('submitBtn');
+  const status = document.getElementById('formStatus');
+
+  if (!name || !email || !service || !message) {
+    status.className = 'form-status error';
+    status.textContent = '⚠ Iltimos, barcha majburiy maydonlarni to\'ldiring.';
+    return;
+  }
+
+  const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRx.test(email)) {
+    status.className = 'form-status error';
+    status.textContent = '⚠ Iltimos, to\'g\'ri email manzil kiriting.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'YUBORILMOQDA...';
+  status.className = 'form-status';
+
+  if (DEMO_MODE || !supabaseClient) {
+    await new Promise(r => setTimeout(r, 1200));
+    status.className = 'form-status success';
+    status.textContent = '✓ Demo rejim: Xabar muvaffaqiyatli yuborildi! (Haqiqiy Supabase kalitlarini sozlang)';
+    showToast('✓ Xabar yuborildi!');
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-email').value = '';
+    document.getElementById('f-phone').value = '';
+    document.getElementById('f-service').value = '';
+    document.getElementById('f-message').value = '';
+  } else {
+    const { error } = await supabaseClient
+      .from('contact_messages')
+      .insert([{ name, email, phone, service, message }]);
+
+    if (error) {
+      status.className = 'form-status error';
+      status.textContent = '✗ Xatolik yuz berdi: ' + error.message;
+      showToast('✗ Xato yuz berdi', 'error');
+    } else {
+      status.className = 'form-status success';
+      status.textContent = '✓ Xabaringiz qabul qilindi! 24 soat ichida javob beraman.';
+      showToast('✓ Xabar yuborildi!');
+      document.getElementById('f-name').value = '';
+      document.getElementById('f-email').value = '';
+      document.getElementById('f-phone').value = '';
+      document.getElementById('f-service').value = '';
+      document.getElementById('f-message').value = '';
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'XABAR YUBORISH →';
+}
+
+// ===== SMOOTH SCROLL =====
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const el = document.querySelector(a.getAttribute('href'));
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+// ===== NAV ACTIVE STATE =====
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('nav');
+  if (nav) {
+    nav.style.background = window.scrollY > 50
+      ? 'rgba(10,10,15,0.98)'
+      : 'rgba(10,10,15,0.85)';
+  }
+});
+</script>
+</body>
+</html>
